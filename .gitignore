@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Private local usage
+
+spreadsheets.py
+secret.json
+settings.py
+.vscode
