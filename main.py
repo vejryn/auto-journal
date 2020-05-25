@@ -8,7 +8,7 @@ import gspread
 import pprint
 from time import sleep
 from lib import bitmex
-from settings_ import API_KEY, API_SECRET, API_BASE
+from settings import API_KEY, API_SECRET, API_BASE
 from oauth2client.service_account import ServiceAccountCredentials
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -56,14 +56,14 @@ while True:
             sheet.update_cell(newrow,5,ETH["currentQty"]) #opening quantity long
         else:
             sheet.update_cell(newrow,4,"SHORT")
-            sheet.update_cell(newrow,5,"-"+ETH["currentQty"]) #opening quantity short
+            sheet.update_cell(newrow,5,"-"+str(ETH["currentQty"])) #opening quantity short
 
     elif ETH["isOpen"] == True and ETH["symbol"] == "ETHUSD" and sheetqty != str(ETH["currentQty"]):
         sheet.update_cell(last,6,ETH["avgEntryPrice"]) #update avg entry
         if ETH["bankruptPrice"] < ETH["avgEntryPrice"]:
             sheet.update_cell(last,5,ETH["currentQty"]) #update qty long
         else:
-            sheet.update_cell(last,5,"-"+ETH["currentQty"]) #update qty short
+            sheet.update_cell(last,5,str(ETH["currentQty"])) #update qty short
         sheetqty = str(ETH["currentQty"])
         pp.pprint("Updated Quantity : %s" % sheetqty)
         pp.pprint("Updated Avg. Entry : %s" % sheetentry)

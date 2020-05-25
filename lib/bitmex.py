@@ -34,70 +34,6 @@ class BitMEX(object):
         # These headers are always sent
         self.session.headers.update({'user-agent': 'easy-data-scripts'})
 
-# Public methods
-    def ticker_data(self):
-        """Get ticker data."""
-        data = self.get_instrument()
-
-        ticker = {
-            # Rounding to tickLog covers up float error
-            "last": data['lastPrice'],
-            "buy": data['bidPrice'],
-            "sell": data['askPrice'],
-            "mid": (float(data['bidPrice']) + float(data['askPrice'])) / 2
-        }
-
-        return {k: round(float(v), data['tickLog']) for k, v in ticker.items()}
-
-    def get_instrument(self):
-        """Get an instrument's details."""
-        path = "instrument"
-        instruments = self._curl_bitmex(path=path, query={'filter': json.dumps({'symbol': self.symbol})})
-        if len(instruments) == 0:
-            print("Instrument not found: %s." % self.symbol)
-            exit(1)
-
-        instrument = instruments[0]
-        if instrument["state"] != "Open":
-            print("The instrument %s is no longer open. State: %s" % (self.symbol, instrument["state"]))
-            exit(1)
-
-        # tickLog is the log10 of tickSize
-        instrument['tickLog'] = int(math.fabs(math.log10(instrument['tickSize'])))
-
-        return instrument
-
-    def market_depth(self):
-        """Get market depth / orderbook."""
-        path = "orderBook"
-        return self._curl_bitmex(path=path, query={'symbol': self.symbol})
-
-    def recent_trades(self):
-        """Get recent trades.
-
-        Returns
-        -------
-        A list of dicts:
-              {u'amount': 60,
-               u'date': 1306775375,
-               u'price': 8.7401099999999996,
-               u'tid': u'93842'},
-
-        """
-        path = "trade"
-        return self._curl_bitmex(path=path)
-
-    @property
-    def snapshot(self):
-        """Get current BBO."""
-        order_book = self.market_depth()
-        return {
-            'bid': order_book[0]['bidPrice'],
-            'ask': order_book[0]['askPrice'],
-            'size_bid': order_book[0]['bidSize'],
-            'size_ask': order_book[0]['askSize']
-        }
-
 # Authentication required methods
     def authenticate(self):
         """Set BitMEX authentication information."""
@@ -109,79 +45,79 @@ class BitMEX(object):
         self.token = loginResponse['id']
         self.session.headers.update({'access-token': self.token})
 
-    def authentication_required(fn):
-        """Annotation for methods that require auth."""
-        def wrapped(self, *args, **kwargs):
-            if not (self.token or self.apiKey):
-                msg = "You must be authenticated to use this method"
-                raise errors.AuthenticationError(msg)
-            else:
-                return fn(self, *args, **kwargs)
-        return wrapped
+    # def authentication_required(fn):
+    #     """Annotation for methods that require auth."""
+    #     def wrapped(self, *args, **kwargs):
+    #         if not (self.token or self.apiKey):
+    #             msg = "You must be authenticated to use this method"
+    #             raise errors.AuthenticationError(msg)
+    #         else:
+    #             return fn(self, *args, **kwargs)
+    #     return wrapped
 
-    @authentication_required
-    def funds(self):
-        """Get your current balance."""
-        return self._curl_bitmex(path="user/margin")
+    # @authentication_required
+    # def funds(self):
+    #     """Get your current balance."""
+    #     return self._curl_bitmex(path="user/margin")
 
-    @authentication_required
-    def buy(self, quantity, price):
-        """Place a buy order.
+    # @authentication_required
+    # def buy(self, quantity, price):
+    #     """Place a buy order.
 
-        Returns order object. ID: orderID
-        """
-        return self.place_order(quantity, price)
+    #     Returns order object. ID: orderID
+    #     """
+    #     return self.place_order(quantity, price)
 
-    @authentication_required
-    def sell(self, quantity, price):
-        """Place a sell order.
+    # @authentication_required
+    # def sell(self, quantity, price):
+    #     """Place a sell order.
 
-        Returns order object. ID: orderID
-        """
-        return self.place_order(-quantity, price)
+    #     Returns order object. ID: orderID
+    #     """
+    #     return self.place_order(-quantity, price)
 
-    @authentication_required
-    def place_order(self, quantity, price):
-        """Place an order."""
-        if price < 0:
-            raise Exception("Price must be positive.")
+    # @authentication_required
+    # def place_order(self, quantity, price):
+    #     """Place an order."""
+    #     if price < 0:
+    #         raise Exception("Price must be positive.")
 
-        endpoint = "order"
-        # Generate a unique clOrdID with our prefix so we can identify it.
-        clOrdID = self.orderIDPrefix + uuid.uuid4().bytes.encode('base64').rstrip('=\n')
-        postdict = {
-            'symbol': self.symbol,
-            'quantity': quantity,
-            'price': price,
-            'clOrdID': clOrdID
-        }
-        return self._curl_bitmex(path=endpoint, postdict=postdict, verb="POST")
+    #     endpoint = "order"
+    #     # Generate a unique clOrdID with our prefix so we can identify it.
+    #     clOrdID = self.orderIDPrefix + uuid.uuid4().bytes.encode('base64').rstrip('=\n')
+    #     postdict = {
+    #         'symbol': self.symbol,
+    #         'quantity': quantity,
+    #         'price': price,
+    #         'clOrdID': clOrdID
+    #     }
+    #     return self._curl_bitmex(path=endpoint, postdict=postdict, verb="POST")
 
-    @authentication_required
-    def open_orders(self):
-        """Get open orders."""
-        path = "order"
+    # @authentication_required
+    # def open_orders(self):
+    #     """Get open orders."""
+    #     path = "order"
 
-        filter_dict = {'ordStatus.isTerminated': False}
-        if self.symbol:
-            filter_dict['symbol'] = self.symbol
+    #     filter_dict = {'ordStatus.isTerminated': False}
+    #     if self.symbol:
+    #         filter_dict['symbol'] = self.symbol
 
-        orders = self._curl_bitmex(
-            path=path,
-            query={'filter': json.dumps(filter_dict)},
-            verb="GET"
-        )
-        # Only return orders that start with our clOrdID prefix.
-        return [o for o in orders if str(o['clOrdID']).startswith(self.orderIDPrefix)]
+    #     orders = self._curl_bitmex(
+    #         path=path,
+    #         query={'filter': json.dumps(filter_dict)},
+    #         verb="GET"
+    #     )
+    #     # Only return orders that start with our clOrdID prefix.
+    #     return [o for o in orders if str(o['clOrdID']).startswith(self.orderIDPrefix)]
 
-    @authentication_required
-    def cancel(self, orderID):
-        """Cancel an existing order."""
-        path = "order"
-        postdict = {
-            'orderID': orderID,
-        }
-        return self._curl_bitmex(path=path, postdict=postdict, verb="DELETE")
+    # @authentication_required
+    # def cancel(self, orderID):
+    #     """Cancel an existing order."""
+    #     path = "order"
+    #     postdict = {
+    #         'orderID': orderID,
+    #     }
+    #     return self._curl_bitmex(path=path, postdict=postdict, verb="DELETE")
 
     def _curl_bitmex(self, path, query=None, postdict=None, timeout=3, verb=None):
         """Send a request to BitMEX Servers."""
