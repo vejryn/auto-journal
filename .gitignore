@@ -133,4 +133,6 @@ spreadsheets.py
 secret.json
 settings.py
 .vscode
-settings_.py
+_setting.py
+_secret.json
+auto_journal.json
