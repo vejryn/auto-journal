@@ -12,11 +12,11 @@ from datetime import datetime
 
 pp = pprint.PrettyPrinter(indent=4)
 scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('_secret.json', scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name('secret.json', scope)
 client = gspread.authorize(creds)
 
-sheet = client.open('Auto Journal')
-worksheet = sheet.worksheet("Journal")
+sheet = client.open('Auto Journal') #Change this to spreadsheet name
+worksheet = sheet.worksheet('Journal') #Change this to worksheet name
 
 # Create connector
 connector = bitmex.BitMEX(base_url=API_BASE, apiKey=API_KEY, apiSecret=API_SECRET)
