@@ -18,7 +18,7 @@ https://console.cloud.google.com/apis/library
 
 ## Enable Google Drive API
 
-![Enable API](https://user-images.githubusercontent.com/22088378/95925574-55e97580-0de4-11eb-9d7d-895683321ba8.png)
+![Enable API](https://user-images.githubusercontent.com/22088378/95926714-24be7480-0de7-11eb-9f9d-c2efbf651018.png)
 
 ## Create Credentials
 
