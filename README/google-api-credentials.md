@@ -36,6 +36,11 @@ Configure like the picture above, then click the blue button
 
 ![Service Account](https://user-images.githubusercontent.com/22088378/95925829-05264c80-0de5-11eb-84f7-aa8b9b045e5d.png)
 
+### Extracting secret.json
+- Click continue
+- Download the credentials json, then rename it into secret.json
+- Copy/move the secret.json into the same folder as main.py
+
 ## Enable Google Sheet API
 
 Back to library and enable sheets api
